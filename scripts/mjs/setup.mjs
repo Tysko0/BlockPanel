@@ -4,203 +4,122 @@ import readline from "node:readline";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 
-const ROOT = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "../.."
-);
+import { CreateLogger } from "./logger.mjs";
 
-const SERVER_DIR = path.join(ROOT, "server", "current");
-const CONFIG_PATH = path.join(SERVER_DIR, "blockpanel.json");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+const server_dir = path.join(root, "server", "current");
+const config_path = path.join(server_dir, "blockpanel.json");
 
-function question(message) {
-    return new Promise(resolve => {
-        rl.question(message, answer => resolve(answer.trim()));
-    });
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+const logger = CreateLogger("setup");
+
+function Question(message) {
+    return new Promise(resolve => { rl.question(message, answer => resolve(answer.trim())); });
 }
 
-async function fetchJson(url) {
+async function FetchJson(url) {
     const response = await fetch(url);
 
-    if (!response.ok) {
-        throw new Error(`Erreur HTTP ${response.status}`);
-    }
+    if (!response.ok) { throw new Error(`Erreur HTTP ${response.status}`); }
+
+    logger.info(`Requête API réussie : ${url}`);
 
     return response.json();
 }
 
-async function download(url, destination, expectedSha1 = null) {
-    console.log("\nTéléchargement en cours...");
+async function Download(url, destination, expectedSha1 = null) {
+    logger.info(`Début du téléchargement : ${url}`);
 
     const response = await fetch(url);
 
-    if (!response.ok) {
-        throw new Error(`Téléchargement impossible : HTTP ${response.status}`);
-    }
+    if (!response.ok) { throw new Error(`Téléchargement impossible : HTTP ${response.status}`); }
+
+    logger.success("Réponse HTTP reçue.");
 
     const buffer = Buffer.from(await response.arrayBuffer());
 
     if (expectedSha1) {
         const sha1 = crypto.createHash("sha1").update(buffer).digest("hex");
 
-        if (sha1 !== expectedSha1) {
-            throw new Error("La vérification SHA-1 a échoué.");
-        }
+        if (sha1 !== expectedSha1) { throw new Error("La vérification SHA-1 a échoué."); }
     }
 
+    logger.success("Vérification SHA-1 réussie.");
+
     const temporary = `${destination}.tmp`;
+
     fs.writeFileSync(temporary, buffer);
     fs.renameSync(temporary, destination);
 
-    console.log(`Téléchargement terminé : ${(buffer.length / 1024 / 1024).toFixed(1)} Mo`);
+    logger.success(`Téléchargement terminé : ${(buffer.length / 1024 / 1024).toFixed(1)} Mo`);
 }
 
-async function installVanilla(version, destination) {
-    const manifest = await fetchJson(
-        "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
-    );
-
+async function InstallVanilla(version, destination) {
+    const manifest = await FetchJson("https://piston-meta.mojang.com/mc/game/version_manifest_v2.json");
     const entry = manifest.versions.find(item => item.id === version);
 
-    if (!entry) {
-        throw new Error(`Version Vanilla introuvable : ${version}`);
-    }
+    if (!entry) { throw new Error(`Version Vanilla introuvable : ${version}`); }
 
-    const metadata = await fetchJson(entry.url);
+    const metadata = await FetchJson(entry.url);
     const downloadInfo = metadata.downloads?.server;
 
-    if (!downloadInfo?.url) {
-        throw new Error("JAR officiel indisponible pour cette version.");
-    }
+    if (!downloadInfo?.url) { throw new Error("JAR officiel indisponible pour cette version."); }
 
-    await download(downloadInfo.url, destination, downloadInfo.sha1);
-}
+    logger.info(`Installation Vanilla : ${version}`);
 
-async function installPaper(version, destination) {
-    const result = await fetchJson(
-        `https://api.papermc.io/v2/projects/paper/versions/${encodeURIComponent(version)}`
-    );
-
-    if (!result.builds?.length) {
-        throw new Error(`Aucun build Paper pour Minecraft ${version}.`);
-    }
-
-    const build = Math.max(...result.builds);
-    const url =
-        `https://api.papermc.io/v2/projects/paper/versions/${encodeURIComponent(version)}` +
-        `/builds/${build}/downloads/paper-${version}-${build}.jar`;
-
-    await download(url, destination);
-}
-
-async function installFabric(version, destination) {
-    const loaders = await fetchJson(
-        `https://meta.fabricmc.net/v2/versions/loader/${encodeURIComponent(version)}`
-    );
-
-    const installers = await fetchJson(
-        "https://meta.fabricmc.net/v2/versions/installer"
-    );
-
-    if (!loaders.length || !installers.length) {
-        throw new Error("Aucune version de Fabric disponible.");
-    }
-
-    const loader = loaders[0].loader.version;
-    const installer = installers[0].version;
-
-    const url =
-        `https://meta.fabricmc.net/v2/versions/loader/${encodeURIComponent(version)}` +
-        `/${encodeURIComponent(loader)}/${encodeURIComponent(installer)}/server/jar`;
-
-    await download(url, destination);
+    await Download(downloadInfo.url, destination, downloadInfo.sha1);
 }
 
 async function main() {
-    console.log("========================================");
-    console.log("      BLOCKPANEL - PREMIER DEMARRAGE");
-    console.log("========================================\n");
+    logger.info("Démarrage du processus d'installation.");
 
-    fs.mkdirSync(SERVER_DIR, { recursive: true });
+    fs.mkdirSync(server_dir, { recursive: true });
 
-    const name = (await question("Nom du serveur : ")) || "Mon serveur Minecraft";
+    const name = (await Question("Nom du serveur : ")) || "Mon serveur Minecraft";
+    logger.info(`Nom du serveur configuré : ${name}`);
 
-    console.log("\nType de serveur :");
-    console.log("1. Vanilla");
-    console.log("2. Paper");
-    console.log("3. Fabric");
+    const version = await Question("Version Minecraft (ex. 1.21.8) : ");
 
-    const choice = await question("\nChoix (1-3) : ");
+    if (!/^\d+\.\d+(?:\.\d+)?$/.test(version)) { throw new Error("Format de version invalide."); }
 
-    const types = {
-        "1": "vanilla",
-        "2": "paper",
-        "3": "fabric"
-    };
+    logger.info(`Version Minecraft sélectionnée : ${version}`);
 
-    const type = types[choice];
-
-    if (!type) {
-        throw new Error("Type de serveur invalide.");
-    }
-
-    const version = await question("Version Minecraft (ex. 1.21.8) : ");
-
-    if (!/^\d+\.\d+(?:\.\d+)?$/.test(version)) {
-        throw new Error("Format de version invalide.");
-    }
-
-    const ramInput = await question("RAM maximale en Go (défaut 2) : ");
+    const ramInput = await Question("RAM maximale en Go (défaut 2) : ");
     const ram = ramInput ? Number(ramInput) : 2;
 
-    if (!Number.isInteger(ram) || ram < 1 || ram > 32) {
-        throw new Error("La RAM doit être comprise entre 1 et 32 Go.");
-    }
+    if (!Number.isInteger(ram) || ram < 1 || ram > 32) { throw new Error("La RAM doit être comprise entre 1 et 32 Go."); }
+
+    logger.info(`RAM maximale configurée : ${ram} Go`);
 
     console.log("\nAvant de continuer, consulte l'EULA de Minecraft :");
     console.log("https://www.minecraft.net/eula");
 
-    const accepted = (
-        await question("\nAs-tu lu et accepté l'EULA ? (oui/non) : ")
-    ).toLowerCase();
+    const accepted = (await Question("\nAs-tu lu et accepté l'EULA ? (oui/non) : ")).toLowerCase();
 
-    if (!["oui", "o"].includes(accepted)) {
-        throw new Error("Installation annulée : EULA non acceptée.");
-    }
+    if (!["oui", "o"].includes(accepted)) { throw new Error("Installation annulée : EULA non acceptée."); }
 
-    const jar = path.join(SERVER_DIR, "server.jar");
-    const temporaryJar = path.join(SERVER_DIR, "server.jar.tmp");
+    logger.success("EULA acceptée par l'utilisateur.");
 
-    fs.rmSync(CONFIG_PATH, { force: true });
+    const jar = path.join(server_dir, "server.jar");
+    const temporaryJar = path.join(server_dir, "server.jar.tmp");
+
+    fs.rmSync(config_path, { force: true });
     fs.rmSync(temporaryJar, { force: true });
 
-    console.log(`\nInstallation de ${type} ${version}...`);
+    console.log(`\nInstallation de Vanilla ${version}...`);
     console.log("Cette opération peut prendre quelques minutes.");
 
-    if (type === "vanilla") {
-        await installVanilla(version, temporaryJar);
-    } else if (type === "paper") {
-        await installPaper(version, temporaryJar);
-    } else {
-        await installFabric(version, temporaryJar);
-    }
+    await InstallVanilla(version, temporaryJar);
 
     fs.renameSync(temporaryJar, jar);
 
     const safeName = name.replace(/[\r\n]/g, " ").slice(0, 50);
 
-    fs.writeFileSync(
-        path.join(SERVER_DIR, "eula.txt"),
-        "eula=true\n",
-        "utf8"
-    );
+    fs.writeFileSync(path.join(server_dir, "eula.txt"), "eula=true\n", "utf8");
 
     fs.writeFileSync(
-        path.join(SERVER_DIR, "server.properties"), [
+        path.join(server_dir, "server.properties"), [
             `motd=${safeName}`,
             "server-port=25565",
             "online-mode=true",
@@ -214,7 +133,6 @@ async function main() {
 
     const config = {
         name: safeName,
-        type,
         version,
         ram,
         eulaAccepted: true,
@@ -222,21 +140,15 @@ async function main() {
         installedAt: new Date().toISOString()
     };
 
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2), "utf8");
+    fs.writeFileSync(config_path, JSON.stringify(config, null, 2), "utf8");
 
-    console.log("\n========================================");
-    console.log("     INSTALLATION TERMINEE");
-    console.log("========================================");
-    console.log(`Serveur : ${safeName}`);
-    console.log(`Type : ${type}`);
-    console.log(`Version : ${version}`);
-    console.log(`RAM : ${ram} Go`);
-    console.log("\nBlockPanel va maintenant lancer Minecraft.");
+    logger.success("Configuration blockpanel.json créée.");
+    logger.success(`Installation terminée pour ${safeName}.`);
 }
 
 main()
     .catch(error => {
-        console.error(`\n[ERREUR] ${error.message}`);
+        logger.exception(error, "Échec de l'installation");
         process.exitCode = 1;
     })
     .finally(() => {

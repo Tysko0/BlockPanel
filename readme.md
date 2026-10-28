@@ -28,8 +28,8 @@ et une organisation claire des fichier et une gestion centralisée.
 - [x] Installation et initialisation du serveur Minecraft
 - [x] Démarrage direct du serveur après installation
 - [x] Barres de progression dans le terminal
-- [ ] Système de log avec horodatage
-- [ ] Rotation automatique avec journaux volumineux
+- [x] Système de log avec horodatage
+- [ ] Dashboard Web
 
 *Les fonctionnalitées cochées correspondent à ce qui est dèja mit en place et ceux qui ne sont pas cochée est ce qui est prevu dans la roadmap*
 
@@ -77,6 +77,7 @@ BlockPanel
 │   ├── start.bat
 │   └── mjs
 │       ├── backend.mjs
+│       ├── logger.mjs
 │       └── setup.mjs
 └── server
 ```
