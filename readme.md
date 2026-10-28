@@ -1,18 +1,17 @@
 <div align="center">
-    <h2>BlockPanel</h2>
-    
-    ```text
-    Un outils Windows conçu pour simplifier l'installation, la configuration 
-    et le démarrage d'un serveur minecraft localhost grâce à des scripts automatisée 
-    en Batch et  JavaScript (Node.js). L'objectif est de propose une installation simple 
-    et une organisation claire des fichier et une gestion centralisée.
-    ```
+<h2>BlockPanel</h2>
+<p>
+Un outils Windows conçu pour simplifier l'installation, la configuration 
+et le démarrage d'un serveur minecraft localhost grâce à des scripts automatisée 
+en Batch et  JavaScript (Node.js). L'objectif est de propose une installation simple 
+et une organisation claire des fichier et une gestion centralisée.
+</p>
 
-    <img src="https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge" alt="Version 1.0.0">
+<img src="https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge" alt="Version 1.0.0">
 
-    <a href="https://github.com/Tysko0/#/blob/main/LICENSE">
-        <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="Licence MIT">
-    </a>
+<a href="https://github.com/Tysko0/BlockPanel/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="Licence MIT">
+</a>
 </div>
 
 ## Technologie Utilisées
@@ -46,7 +45,7 @@
 ### Cloner le dépôt
 
 ```bash
-git clone https://github.com/Tysko0/#.git
+git clone https://github.com/Tysko0/BlockPanel.git
 cd BlockPanel
 ```
 
