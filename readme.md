@@ -51,7 +51,7 @@ cd BlockPanel
 
 ### Lancer BlockPanel
 
-**Double Click sur le fichier `start.bat` ou exécute-le depuis un terminal Windows : **
+**Double Click sur le fichier `start.bat` ou exécute-le depuis un terminal Windows :**
 
 ```bash
 start.bat
@@ -59,13 +59,13 @@ start.bat
 
 ### Première Installation
 
-*Lors d'une premier lancement, BlockPanel vérifie son environnement et démarre le processus d'installation.*
-*Selon la configuration proposée, tu pourras notamment choisir les paramètre du serveur et accepeter l'EULA de minecraft*
-*Une fois l'installation terminée, BlockPanel lance le serveur*
+Lors d'une premier lancement, BlockPanel vérifie son environnement et démarre le processus d'installation.
+Selon la configuration proposée, tu pourras notamment choisir les paramètre du serveur et accepeter l'EULA de minecraft
+Une fois l'installation terminée, BlockPanel lance le serveur
 
 ### Lancements suivants 
 
-*Lorsque les fichiers d'installations sont présents, BlockPanel passe directement au démarrage du serveur minecraft avec ses paramètre*
+Lorsque les fichiers d'installations sont présents, BlockPanel passe directement au démarrage du serveur minecraft avec ses paramètre
 
 ## Structure du projet
 
