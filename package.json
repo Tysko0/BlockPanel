@@ -1,0 +1,21 @@
+{
+  "name": "blockpanel",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/mjs/backend.mjs",
+    "setup": "node scripts/mjs/setup.mjs"
+  },
+  "dependencies": {
+    "connect-sqlite3": "^0.9.15",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "lucide-react": "^1.63.0",
+    "react-router-dom": "^7.18.5",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.4"
+  }
+}
