@@ -1,10 +1,12 @@
 <div align="center">
     <h2>BlockPanel</h2>
-    <p>
-        Un outils Windows conçu pour simplifier l'installation, la configuration et le démarrage d'un serveur minecraft 
-        localhost grâce à des scripts automatisée en Batch et JavaScript (Node.js).
-        L'objectif est de propose une installation simple et une organisation claire des fichier et une gestion centralisée.
-    </p>
+    
+    ```text
+    Un outils Windows conçu pour simplifier l'installation, la configuration 
+    et le démarrage d'un serveur minecraft localhost grâce à des scripts automatisée 
+    en Batch et  JavaScript (Node.js). L'objectif est de propose une installation simple 
+    et une organisation claire des fichier et une gestion centralisée.
+    ```
 
     <img src="https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge" alt="Version 1.0.0">
 
@@ -27,8 +29,8 @@
 - [x] Installation et initialisation du serveur Minecraft
 - [x] Démarrage direct du serveur après installation
 - [x] Barres de progression dans le terminal
-- [] Système de log avec horodatage
-- [] Rotation automatique avec journaux volumineux
+- [ ] Système de log avec horodatage
+- [ ] Rotation automatique avec journaux volumineux
 
 *Les fonctionnalitées cochées correspondent à ce qui est dèja mit en place et ceux qui ne sont pas cochée est ce qui est prevu dans la roadmap*
 
@@ -50,7 +52,7 @@ cd BlockPanel
 
 ### Lancer BlockPanel
 
-**Double Click sur le fichier `start.bat` ou exécute-le depuis un terminal Windows : 
+**Double Click sur le fichier `start.bat` ou exécute-le depuis un terminal Windows : **
 
 ```bash
 start.bat
@@ -99,4 +101,6 @@ Développé par Tysko
 
 ---
 
-*Développé avec passion pour simplifier la gestion des serveurs Minecraft.*
+<div align="center">
+    *Développé avec passion pour simplifier la gestion des serveurs Minecraft.*
+</div>
